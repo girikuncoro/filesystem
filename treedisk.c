@@ -144,7 +144,7 @@ static void freeblock(block_if below, block_no bno, struct treedisk_snapshot *sn
 	struct treedisk_superblock *sb = (struct treedisk_superblock *) &snapshot->superblock;
 
 	if(sb->free_list == 0) {
-		printf("CASE 1\n");
+		// printf("CASE 1\n");
 		struct treedisk_freelistblock new_flb;
 		(below->read)(below, bno, (block_t *) &new_flb);
 		memset(&new_flb, 0, BLOCK_SIZE);		// fill it with 0
@@ -153,7 +153,7 @@ static void freeblock(block_if below, block_no bno, struct treedisk_snapshot *sn
 		sb->free_list = bno;
 		(below->write)(below, 0, (block_t *) sb);
 	} else {
-		printf("CASE 2\n");
+		// printf("CASE 2\n");
 		struct treedisk_freelistblock old_flb;
 		(below->read)(below, sb->free_list, (block_t *) &old_flb);
 
@@ -170,7 +170,7 @@ static void freeblock(block_if below, block_no bno, struct treedisk_snapshot *sn
 
 		// If no entries available, create new free block
 		if(is_space_avail == 0) {
-			printf("CASE 3\n");
+			// printf("CASE 3\n");
 			struct treedisk_freelistblock new_flb;
 			(below->read)(below, bno, (block_t *) &new_flb);
 			new_flb.refs[0] = sb->free_list;
@@ -190,7 +190,7 @@ static void traverse_helper(block_if below, block_no bno, unsigned int nlevels, 
 		if(bno != 0) { freeblock(below, bno, snapshot); }
 	} else {
 		struct treedisk_indirblock ib;
-		(below->read)(below, snapshot->inode->root, (block_t *) &ib);
+		(below->read)(below, bno, (block_t *) &ib);
 		for(int i=0; i < REFS_PER_BLOCK; i++) {
 			if(ib.refs[i] != 0) {
 				traverse_helper(below, ib.refs[i], nlevels-1, snapshot);
